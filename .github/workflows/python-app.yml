@@ -1,29 +1,29 @@
-name: Python Application
+name: Deploy GitHub Pages
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
-  run-python-app:
+  deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Set up Node.js (if using static site generator)
+        uses: actions/setup-node@v3
         with:
-          python-version: '3.x'
+          node-version: '16'
 
       - name: Install dependencies
-        run: |
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        run: npm install # Jika Anda menggunakan alat build seperti Jekyll, Hugo, atau lainnya, sesuaikan dengan perintah instalasinya
 
-      - name: Run Python script
-        run: python app.py
+      - name: Build project
+        run: npm run build # Sesuaikan dengan proses build untuk project Anda
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
