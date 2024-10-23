@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Rekomendasi Skincare</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Rekomendasi Produk Skincare</h1>
+        <form id="recommendationForm" aria-label="Form Rekomendasi Skincare">
+            <label for="complaint">Masukkan Keluhan Kulit:</label>
+            <input type="text" id="complaint" placeholder="Contoh: kulit kusam, berminyak" required aria-required="true">
+            <button type="submit">Dapatkan Rekomendasi</button>
+        </form>
+        <h2>Rekomendasi Produk:</h2>
+        <ul id="recommendationsList"></ul>
+    </div>
+
+    <script>
+        document.getElementById('recommendationForm').addEventListener('submit', function (e) {
+            e.preventDefault(); // Mencegah pengiriman form secara default
+
+            const complaint = document.getElementById('complaint').value.trim(); // Mengambil nilai keluhan dan menghapus spasi di awal/akhir
+            console.log(`Mengirim keluhan: ${complaint}`);
+
+            // Ganti URL ini dengan URL server yang ingin Anda hubungi
+            const serverUrl = 'http://localhost:5000/recommendations'; // Ganti dengan alamat server yang dapat diakses
+
+            // Mengambil rekomendasi dari server
+            fetch(`${serverUrl}/${encodeURIComponent(complaint)}`)
+                .then(response => {
+                    console.log('Respons diterima:', response);
+                    if (!response.ok) {
+                        throw new Error('Keluhan tidak ditemukan atau kesalahan server');
+                    }
+                    return response.json(); // Mengonversi respons ke JSON
+                })
+                .then(data => {
+                    console.log('Data diterima:', data);
+                    const recommendationsList = document.getElementById('recommendationsList');
+                    recommendationsList.innerHTML = ''; // Kosongkan daftar sebelumnya
+                    
+                    // Pastikan data.recommendations adalah array
+                    if (Array.isArray(data.recommendations) && data.recommendations.length > 0) {
+                        data.recommendations.forEach(product => {
+                            // Membuat elemen daftar baru untuk setiap produk
+                            const li = document.createElement('li');
+                            li.textContent = `${product.name} - ${product.type}: ${product.description}`;
+                            recommendationsList.appendChild(li);
+                        });
+                    } else {
+                        recommendationsList.innerHTML = '<li>Tidak ada rekomendasi yang tersedia.</li>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Kesalahan terjadi:', error);
+                    const recommendationsList = document.getElementById('recommendationsList');
+                    recommendationsList.innerHTML = `<li>${error.message}</li>`; // Menampilkan pesan kesalahan
+                });
+        });
+    </script>
+</body>
+</html>
